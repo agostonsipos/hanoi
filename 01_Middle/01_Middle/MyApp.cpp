@@ -98,8 +98,8 @@ bool CMyApp::Init()
 	//
 	// shaderek betöltése
 	//
-	m_program.AttachShader(GL_VERTEX_SHADER, "myVert.vert");
-	m_program.AttachShader(GL_FRAGMENT_SHADER, "myFrag.frag");
+	m_program.AttachShader(GL_VERTEX_SHADER, "dirLight.vert");
+	m_program.AttachShader(GL_FRAGMENT_SHADER, "dirLight.frag");
 
 	m_program.BindAttribLoc(0, "vs_in_pos");
 	m_program.BindAttribLoc(1, "vs_in_normal");
@@ -201,6 +201,10 @@ void CMyApp::Render()
 
 
 	m_program.On();
+	bool b = false;
+	for (int i = 0; i < 7; ++i){
+		if (korong_up[i]) b = true;
+	}
 
 	for (int i = 0; i < 7; ++i){
 		glm::mat4 meret = glm::scale<float>(1.0f + i * 0.2f, 1.0f, 1.0f + i * 0.2f);
@@ -227,6 +231,18 @@ void CMyApp::Render()
 		matWorld *= meret;
 		matWorldIT = glm::transpose(glm::inverse(matWorld));
 		mvp = m_camera.GetViewProj() *matWorld;
+
+		if (korong_up[i]){
+			m_program.SetUniform("Kd", glm::vec4(0.4f, 0.4f, 1.0f, 1.0f));
+			m_program.SetUniform("Ks", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			m_program.SetUniform("korong_up", 1);
+			m_program.SetUniform("korong_pos", glm::vec3(matWorld[3]));
+		}
+		else{
+			m_program.SetUniform("Kd", glm::vec4(0.3f, 0.7f, 0.4f, 1.0f));
+			m_program.SetUniform("Ks", glm::vec4(0.3f, 0.7f, 0.4f, 1.0f));
+		}
+		if (!b) m_program.SetUniform("korong_up", 0);
 
 		m_program.SetUniform("world", matWorld);
 		m_program.SetUniform("worldIT", matWorldIT);

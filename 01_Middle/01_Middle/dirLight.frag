@@ -16,15 +16,19 @@ out vec4 fs_out_col;
 uniform vec3 eye_pos = vec3(0, 15, 15);
 
 // fénytulajdonságok
-uniform vec3 light_pos = vec3( 0, 5, 0 );
-uniform vec4 La = vec4(0.1f, 0.1f, 0.1f, 1);
-uniform vec4 Ld = vec4(0.5f, 0.5f, 0.5f, 1);
-uniform vec4 Ls = vec4(1, 1, 1, 1);
+uniform int korong_up = 0;
+uniform vec3 korong_pos;
+uniform vec4 Ld2 = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+uniform vec3 lightdir = vec3( 1, -1, 1 );
+uniform vec4 La = vec4(0.3f, 0.3f, 0.3f, 1);
+uniform vec4 Ld = vec4(0.7f, 0.7f, 0.7f, 1);
+uniform vec4 Ls = vec4(1, 0.6, 0.6, 1);
 
 // anyagtulajdonságok
-uniform vec4 Ka = vec4(1, 1, 1, 1);
-uniform vec4 Kd = vec4(0.75f, 0.25f, 0.125f, 1);
-uniform vec4 Ks = vec4(0, 1, 0, 1);
+uniform vec4 Ka = vec4(0.3, 0.7, 0.4, 1);
+uniform vec4 Kd = vec4(0.3, 0.7, 0.4, 1);
+uniform vec4 Ks = vec4(0.3, 0.7, 0.4, 1);
 uniform float specular_power = 16;
 uniform sampler2D texImage;
 
@@ -45,10 +49,17 @@ void main()
 	    - clamp: http://www.opengl.org/sdk/docs/manglsl/xhtml/clamp.xml
 	*/
 	vec3 normal = normalize( vs_out_normal );
-	vec3 toLight = normalize(light_pos - vs_out_pos);
+	vec3 toLight = normalize(-lightdir);
 	float di = clamp( dot( toLight, normal), 0.0f, 1.0f );
 	vec4 diffuse = Ld*Kd*di;
 
+	vec4 diffuse2 = vec4(0);
+	if(korong_up == 1){
+		vec3 normal2 = normalize( vs_out_normal );
+		vec3 toLight2 = normalize( korong_pos - vs_out_pos );
+		float di2 = clamp( dot( toLight2, normal2), 0.0f, 1.0f );
+		diffuse2 = Ld2*Kd*di2;
+	}
 	//
 	// fényfoltképzõ szín
 	//
@@ -67,5 +78,5 @@ void main()
 		specular = Ls*Ks*si;
 	}
 
-	fs_out_col = (ambient + diffuse + specular ) * texture(texImage, vs_out_tex0.st);
+	fs_out_col = (ambient + diffuse + diffuse2 + specular ) * texture(texImage, vs_out_tex0.st);
 }
