@@ -54,11 +54,16 @@ protected:
 
 	int active = 0;
 
-	int korong_pos = 0;
-	bool korong_up = 0;
+	int korong_pos[7];
+	bool korong_up[7];
+	int korong_height[7];
 
-	int dir = 0;
-	int updir = 0;
+	int dir[7];
+	int updir[7];
 	float t;
+
+	int korong_num[3];
+
+	int top_korong(int oszlop);
 };
 

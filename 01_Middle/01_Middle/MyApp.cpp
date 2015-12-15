@@ -11,6 +11,12 @@ CMyApp::CMyApp(void)
 	m_textureID = 0;
 	m_korong = 0;
 	m_oszlop = 0;
+	memset(korong_pos, 0, 7 * sizeof(int));
+	memset(korong_up, 0, 7 * sizeof(bool));
+	memset(dir, 0, 7 * sizeof(int));
+	memset(updir, 0, 7 * sizeof(int));
+	memset(korong_num, 0, 3 * sizeof(int));
+	korong_num[0] = 7;
 }
 
 
@@ -53,6 +59,9 @@ GLuint CMyApp::GenTexture()
 
 bool CMyApp::Init()
 {
+	for (int i = 0; i < 7; ++i){
+		korong_height[i] = 6 - i;
+	}
 	// törlési szín legyen kékes
 	glClearColor(0.125f, 0.25f, 0.5f, 1.0f);
 
@@ -174,7 +183,7 @@ void CMyApp::Render()
 
 	for (int i = 0; i < 3; ++i){
 		matWorld = oszlop_pos[i];
-		if (i == active) matWorld *= glm::scale<float>(1, 1.1, 1);
+		if (i == active) matWorld *= glm::scale<float>(1.0f, 1.1f, 1.0f);
 		matWorldIT = glm::transpose(glm::inverse(matWorld));
 		mvp = m_camera.GetViewProj() *matWorld;
 
@@ -193,59 +202,100 @@ void CMyApp::Render()
 
 	m_program.On();
 
-	if (korong_up) matWorld = glm::translate<float>(0, 20, 0);
-	else matWorld = glm::mat4(1.0f);
+	for (int i = 0; i < 7; ++i){
+		glm::mat4 meret = glm::scale<float>(1.0f + i * 0.2f, 1.0f, 1.0f + i * 0.2f);
 
-	matWorld *= glm::translate<float>(0,(SDL_GetTicks()-t)/1000.0f*20*updir,0);
+		matWorld = glm::mat4(1.0f);
 
-	if (updir && SDL_GetTicks() - t >= 1000){ updir = 0; korong_up = !korong_up; }
+		if (korong_up[i]) matWorld = glm::translate<float>(0, 20, 0);
+		else matWorld = glm::translate<float>(0, korong_height[i], 0);
 
-	//matWorld *= oszlop_pos[korong_pos];
-	matWorld *= glm::translate<float>((SDL_GetTicks()-t)/1000.0f*20*dir,0,0) * oszlop_pos[korong_pos];
+		matWorld *= glm::translate<float>(0, (SDL_GetTicks() - t) / 1000.0f * (20-korong_height[i]) * updir[i], 0);
 
-	if (dir && SDL_GetTicks() - t >= 1000){ dir = 0; korong_pos = active; }
+		if (updir[i] && SDL_GetTicks() - t >= 1000){ 
+			updir[i] = 0; korong_up[i] = !korong_up[i]; 
+		}
 
-	matWorldIT = glm::transpose(glm::inverse(matWorld));
-	mvp = m_camera.GetViewProj() *matWorld;
+		//matWorld *= oszlop_pos[korong_pos];
+		matWorld *= glm::translate<float>((SDL_GetTicks() - t) / 1000.0f * 20 * dir[i], 0, 0) * oszlop_pos[korong_pos[i] ];
 
-	m_program.SetUniform("world", matWorld);
-	m_program.SetUniform("worldIT", matWorldIT);
-	m_program.SetUniform("MVP", mvp);
-	m_program.SetUniform("eye_pos", m_camera.GetEye());
+		if (dir[i] && SDL_GetTicks() - t >= 1000){ 
+			dir[i] = 0; korong_pos[i] = active; 
+			korong_height[i] = (top_korong(active)==-1?0:korong_height[top_korong(active)]+1);
+		}
 
-	m_program.SetTexture("texImage", 0, m_korong_textureID);
+		matWorld *= meret;
+		matWorldIT = glm::transpose(glm::inverse(matWorld));
+		mvp = m_camera.GetViewProj() *matWorld;
 
-	m_korong->draw();
+		m_program.SetUniform("world", matWorld);
+		m_program.SetUniform("worldIT", matWorldIT);
+		m_program.SetUniform("MVP", mvp);
+		m_program.SetUniform("eye_pos", m_camera.GetEye());
 
+		m_program.SetTexture("texImage", 0, m_korong_textureID);
+
+		m_korong->draw();
+
+	}
 	m_program.Off();
+}
+
+int CMyApp::top_korong(int oszlop){
+	int min = -1, ind;
+	for (int i = 0; i < 7; ++i){
+		if (korong_pos[i] == oszlop && !korong_up[i] && korong_height[i] > min){
+			ind = i;
+			min = korong_height[i];
+		}
+	}
+	if (min != -1) return ind;
+	else return -1;
 }
 
 void CMyApp::KeyboardDown(SDL_KeyboardEvent& key)
 {
 	m_camera.KeyboardDown(key);
-	if (dir != 0 || updir != 0) return;
+	for (int i = 0; i < 7; ++i)
+		if (dir[i] != 0 || updir[i] != 0) return;
 	switch (key.keysym.sym){
 	case SDLK_LEFT:
-		if (active != 0) --active;
-		if (korong_up){
-			t = SDL_GetTicks();
-			dir = -1;
-			//korong_pos = active;
+		if (active != 0){
+			--active;
+			for (int i = 0; i < 7; ++i)
+			if (korong_up[i]){
+				t = static_cast<float>(SDL_GetTicks());
+				dir[i] = -1;
+				//korong_pos = active;
+			}
 		}
 		break;
 	case SDLK_RIGHT:
-		if (active != 2) ++active;
-		if (korong_up){
-			t = SDL_GetTicks();
-			dir = 1;
-			//korong_pos = active;
+		if (active != 2){
+			++active;
+			for (int i = 0; i < 7; ++i)
+			if (korong_up[i]){
+				t = static_cast<float>(SDL_GetTicks());
+				dir[i] = 1;
+				//korong_pos = active;
+			}
 		}
 		break;
 	case SDLK_SPACE:
-		if (korong_pos == active){
-			if (korong_up) updir = -1;
-			else updir = 1;
-			t = SDL_GetTicks();
+		bool b = false;
+		int i;
+		for (i = 0; !b && i < 7; ++i)
+			b = korong_up[i];
+		if (b){
+			updir[i-1] = -1;
+			t = static_cast<float>(SDL_GetTicks());
+			return;
+		}
+		i = top_korong(active);
+		if (i == -1) return;
+		if (korong_pos[i] == active){
+			updir[i] = 1;
+			t = static_cast<float>(SDL_GetTicks());
 			//korong_up = !korong_up;
 		}
 	}
