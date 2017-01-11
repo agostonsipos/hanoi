@@ -37,13 +37,11 @@ public:
 	void MouseWheel(SDL_MouseWheelEvent&);
 	void Resize(int, int);
 protected:
-	// belsõ eljárások
 	GLuint GenTexture();
 
-	// OpenGL-es dolgok
-	GLuint m_textureID; // textúra erõforrás azonosító
-	GLuint m_korong_textureID; // textúra erõforrás azonosító
-	GLuint m_oszlop_textureID; // textúra erõforrás azonosító
+	GLuint m_textureID;
+	GLuint m_korong_textureID;
+	GLuint m_oszlop_textureID;
 
 	gCamera			m_camera;
 	gShaderProgram	m_program;

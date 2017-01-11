@@ -46,7 +46,6 @@ int main(int argc, char** argv)
 {
 	atexit([](){std::cin.get(); });
 
-	// pozíciók
 	osg::ref_ptr<osg::Vec3Array> vertices1 = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normals1 = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec2Array> texcoords1 = new osg::Vec2Array;
@@ -124,16 +123,13 @@ int main(int argc, char** argv)
 	osg::ref_ptr<osg::Geometry> kocka = new osg::Geometry;
 	kocka->setUseVertexBufferObjects(true);
 
-	// állítsuk be, hogy a VBO-ba milyen adatok kerüljenek
 	kocka->setVertexArray(vertices1.get());
 	kocka->setNormalArray(normals1.get());
 	kocka->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 	kocka->setTexCoordArray(0, texcoords1.get());
-	// kirajzolandó primitív meghatározása
 	kocka->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLES, 0, 6 * 6));
 
 
-	// pozíciók
 	osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array;
@@ -144,11 +140,10 @@ int main(int argc, char** argv)
 		for (int j = 0; j<N; ++j){
 			float x = i*delta;
 			float y = j*delta;
-			// 1. háromszög: x,y x+delta,y y+delta,x
 			calc(3, x, y, vertices, normals, texcoords);
 			calc(3, x, y + delta, vertices, normals, texcoords);
 			calc(3, x + delta, y, vertices, normals, texcoords);
-			// 2. háromszög: x+delta,y x+delta,y+delta y+delta,x
+			
 			calc(3, x + delta, y, vertices, normals, texcoords);
 			calc(3, x, y + delta, vertices, normals, texcoords);
 			calc(3, x + delta, y + delta, vertices, normals, texcoords);
@@ -158,11 +153,10 @@ int main(int argc, char** argv)
 		for (int j = 0; j<N; ++j){
 			float x = i*delta;
 			float y = j*delta;
-			// 1. háromszög: x,y x+delta,y y+delta,x
 			calc<true>(1, x, y, vertices, normals, texcoords);
 			calc<true>(1, x + delta, y, vertices, normals, texcoords);
 			calc<true>(1, x, y + delta, vertices, normals, texcoords);
-			// 2. háromszög: x+delta,y x+delta,y+delta y+delta,x
+			
 			calc<true>(1, x + delta, y, vertices, normals, texcoords);
 			calc<true>(1, x + delta, y + delta, vertices, normals, texcoords);
 			calc<true>(1, x, y + delta, vertices, normals, texcoords);
@@ -170,40 +164,34 @@ int main(int argc, char** argv)
 	}
 	for (int i = 0; i<N; ++i){
 		float x = i*delta;
-		// 1. háromszög: x,y x+delta,y y+delta,x
 		calc2<true>(1, x + delta, 1, vertices, normals, texcoords);
 		calc2<true>(3, x, 1, vertices, normals, texcoords);
 		calc2<true>(1, x, 1, vertices, normals, texcoords);
-		// 2. háromszög: x+delta,y x+delta,y+delta y+delta,x
+		
 		calc2<true>(3, x, 1, vertices, normals, texcoords);
 		calc2<true>(1, x + delta, 1, vertices, normals, texcoords);
 		calc2<true>(3, x + delta, 1, vertices, normals, texcoords);
 	}
 	for (int i = 0; i<N; ++i){
 		float x = i*delta;
-		// 1. háromszög: x,y x+delta,y y+delta,x
 		calc2<false>(1, x + delta, 0, vertices, normals, texcoords);
 		calc2<false>(1, x, 0, vertices, normals, texcoords);
 		calc2<false>(3, x, 0, vertices, normals, texcoords);
-		// 2. háromszög: x+delta,y x+delta,y+delta y+delta,x
+		
 		calc2<false>(3, x, 0, vertices, normals, texcoords);
 		calc2<false>(3, x + delta, 0, vertices, normals, texcoords);
 		calc2<false>(1, x + delta, 0, vertices, normals, texcoords);
 	}
 
-	// négyszög geometria
 	osg::ref_ptr<osg::Geometry> quad = new osg::Geometry;
 	quad->setUseVertexBufferObjects(true);
 
-	// állítsuk be, hogy a VBO-ba milyen adatok kerüljenek
 	quad->setVertexArray(vertices.get());
 	quad->setNormalArray(normals.get());
 	quad->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 	quad->setTexCoordArray(0, texcoords.get());
-	// kirajzolandó primitív meghatározása
 	quad->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLES, 0, 2 * 6 * N*N + 2 * 6 * N));
 
-	// textúra betöltése
 	osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
 	osg::ref_ptr<osg::Image> image = osgDB::readImageFile("wood_texture.bmp");
 	texture->setImage(image.get());
@@ -211,7 +199,7 @@ int main(int argc, char** argv)
 	texture->setFilter(osg::Texture::FilterParameter::MAG_FILTER, osg::Texture::FilterMode::LINEAR);
 	texture->setWrap(osg::Texture::WRAP_S, osg::Texture::WrapMode::REPEAT);
 	texture->setWrap(osg::Texture::WRAP_T, osg::Texture::WrapMode::REPEAT);
-	// textúra betöltése
+	
 	osg::ref_ptr<osg::Texture2D> texture2 = new osg::Texture2D;
 	osg::ref_ptr<osg::Image> image2 = osgDB::readImageFile("stone_texture.bmp");
 	texture2->setImage(image2.get());
@@ -230,10 +218,8 @@ int main(int argc, char** argv)
 	osg::ref_ptr<osg::Geode> henger = new osg::Geode;
 	henger->addDrawable(quad.get());
 
-	// rakjuk be egy geode-ba a quad-ot, mint kirajzolandó elemet!
 	osg::ref_ptr<osg::Group> root = new osg::Group;
 	root->addChild(oszlop.get());
-	//root->addChild(henger.get());
 
 	for (int i = 0; i < 7; ++i){
 		osg::ref_ptr<osg::MatrixTransform> korong = new osg::MatrixTransform;
@@ -244,28 +230,23 @@ int main(int argc, char** argv)
 		root->addChild(korong.get());
 	}
 
-	// 0-ás mintavételezõre rakjuk rá a textúrát
 	henger->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture.get());
 	oszlop->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture2.get());
 	osg::StateSet* state = root->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING,
-		osg::StateAttribute::OFF |
+		osg::StateAttribute::ON |
 		osg::StateAttribute::PROTECTED);
 	state->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 
-	// hozzuk létre a viewer-t és állítsuk be a gyökeret megjelenítendõ adatnak
 	osgViewer::Viewer viewer;
 	viewer.setSceneData(root.get());
 
-	// a (20,20) kezdeti pozícióba hozzunk létre egy 640x480-as ablakot
 	viewer.setUpViewInWindow(20, 20, 640, 480);
 	viewer.getCamera()->setClearColor(osg::Vec4(1,1,1,1));
 	viewer.realize();
 
-	// írjuk ki egy obj fájlba a parametrikus felületünket!
-	osgDB::writeNodeFile(*(henger.get()), "korong.obj");
-	osgDB::writeNodeFile(*(oszlop.get()), "oszlop.obj");
+	osgDB::writeNodeFile(*(henger.get()), "disk.obj");
+	osgDB::writeNodeFile(*(oszlop.get()), "tower.obj");
 
-	// adjuk át a vezérlést a viewer-nek
 	return viewer.run();
 }
