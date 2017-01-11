@@ -1,7 +1,7 @@
 #include "MyApp.h"
 #include "GLUtils.hpp"
 
-#include <GL/GLU.h>
+#include <GL/glu.h>
 #include <math.h>
 
 #include "ObjParser_OGL3.h"
@@ -176,14 +176,14 @@ void CMyApp::Render()
 	// shader kikapcsolasa
 	m_program.Off();
 
-	glm::mat4 oszlop_pos[3] = {glm::translate<float>(-20,0,0), glm::mat4(1.0f), glm::translate<float>(20,0,0)};
+	glm::mat4 oszlop_pos[3] = {glm::translate<float>(glm::vec3(-20,0,0)), glm::mat4(1.0f), glm::translate<float>(glm::vec3(20,0,0))};
 
 	// 2. program
 	m_program.On();
 
 	for (int i = 0; i < 3; ++i){
 		matWorld = oszlop_pos[i];
-		if (i == active) matWorld *= glm::scale<float>(1.0f, 1.1f, 1.0f);
+		if (i == active) matWorld *= glm::scale<float>(glm::vec3(1.0f, 1.1f, 1.0f));
 		matWorldIT = glm::transpose(glm::inverse(matWorld));
 		mvp = m_camera.GetViewProj() *matWorld;
 
@@ -207,21 +207,20 @@ void CMyApp::Render()
 	}
 
 	for (int i = 0; i < 7; ++i){
-		glm::mat4 meret = glm::scale<float>(1.0f + i * 0.2f, 1.0f, 1.0f + i * 0.2f);
+		glm::mat4 meret = glm::scale<float>(glm::vec3(1.0f + i * 0.2f, 1.0f, 1.0f + i * 0.2f));
 
 		matWorld = glm::mat4(1.0f);
 
-		if (korong_up[i]) matWorld = glm::translate<float>(0, 20, 0);
-		else matWorld = glm::translate<float>(0, korong_height[i], 0);
+		if (korong_up[i]) matWorld = glm::translate<float>(glm::vec3(0, 20, 0));
+		else matWorld = glm::translate<float>(glm::vec3(0, korong_height[i], 0));
 
-		matWorld *= glm::translate<float>(0, (SDL_GetTicks() - t) / 1000.0f * (20-korong_height[i]) * updir[i], 0);
+		matWorld *= glm::translate<float>(glm::vec3(0, (SDL_GetTicks() - t) / 1000.0f * (20-korong_height[i]) * updir[i], 0));
 
 		if (updir[i] && SDL_GetTicks() - t >= 1000){ 
 			updir[i] = 0; korong_up[i] = !korong_up[i]; 
 		}
 
-		//matWorld *= oszlop_pos[korong_pos];
-		matWorld *= glm::translate<float>((SDL_GetTicks() - t) / 1000.0f * 20 * dir[i], 0, 0) * oszlop_pos[korong_pos[i] ];
+		matWorld *= glm::translate<float>(glm::vec3((SDL_GetTicks() - t) / 1000.0f * 20 * dir[i], 0, 0)) * oszlop_pos[korong_pos[i] ];
 
 		if (dir[i] && SDL_GetTicks() - t >= 1000){ 
 			dir[i] = 0; korong_pos[i] = active; 

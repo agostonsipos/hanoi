@@ -163,13 +163,13 @@ void gShaderProgram::BindFragDataLoc(int _index, const char* _uniform)
 	glBindFragDataLocation(m_id_program, _index, _uniform);
 }
 
-void gShaderProgram::SetUniform(const char* _uniform, glm::vec2& _vec)
+void gShaderProgram::SetUniform(const char* _uniform, const glm::vec2& _vec)
 {
 	GLint loc = getLocation(_uniform);
 	glUniform2fv( loc, 1, &_vec[0] );
 }
 
-void gShaderProgram::SetUniform(const char* _uniform, glm::vec3& _vec)
+void gShaderProgram::SetUniform(const char* _uniform, const glm::vec3& _vec)
 {
 	GLint loc = getLocation(_uniform);
 	glUniform3fv( loc, 1, &_vec[0] );
@@ -205,13 +205,13 @@ void gShaderProgram::SetUniform(const char* _uniform, float _a, float _b, float 
 	glUniform4f( loc, _a, _b, _c, _d );
 }
 
-void gShaderProgram::SetUniform(const char* _uniform, glm::vec4& _vec)
+void gShaderProgram::SetUniform(const char* _uniform, const glm::vec4& _vec)
 {
 	GLint loc = getLocation(_uniform);
 	glUniform4fv( loc, 1, &_vec[0] );
 }
 
-void gShaderProgram::SetUniform(const char* _uniform, glm::mat4& _mat)
+void gShaderProgram::SetUniform(const char* _uniform, const glm::mat4& _mat)
 {
 	GLint loc = getLocation(_uniform);
 	glUniformMatrix4fv( loc, 1, GL_FALSE, &(_mat[0][0]) );
